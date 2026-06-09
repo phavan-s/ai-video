@@ -3,19 +3,50 @@ import multer from "multer";
 import cors from "cors";
 import dotenv from "dotenv";
 import s3Client from "./services/s3Service.js";
+import fs from "fs";
 
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-//import { analyzeScreenshots } from "./services/bedrockService.js";
-import { analyzeScreenshots } from "./services/groqService.js";
+
+import { generateNarration } from "./services/groqService.js";
+import { generateSpeech, generateSlideAudios } from "./services/pollyService.js";
+import { createSlideVideo, mergeVideos } from "./services/videoService.js";
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const storage = multer.memoryStorage();
 
 const upload = multer({ storage });
+
+if (!fs.existsSync("generated/images")) {
+  fs.mkdirSync("generated/images", {
+    recursive: true
+  });
+}
+
+if (!fs.existsSync("generated/audio")) {
+  fs.mkdirSync("generated/audio", {
+    recursive: true
+  });
+}
+
+if (!fs.existsSync("generated/video")) {
+  fs.mkdirSync("generated/video", {
+    recursive: true
+  });
+}
+
+if (!fs.existsSync("generated/final")) {
+  fs.mkdirSync("generated/final", {
+    recursive: true
+  });
+}
+
+
 
 app.get("/", (req, res) => {
   res.send("Backend Running");
@@ -28,11 +59,25 @@ app.post("/upload", upload.array("images", 10), async (req, res) => {
   try {
 
     const imageUrls = [];
+    const localImages = [];
 
-    for (const file of req.files) {
+    // Save locally + Upload to S3
+    for (let i = 0; i < req.files.length; i++) {
+
+      const file = req.files[i];
+
+      const localImagePath =
+        `generated/images/slide${i + 1}.png`;
+
+      fs.writeFileSync(
+        localImagePath,
+        file.buffer
+      );
+
+      localImages.push(localImagePath);
 
       const fileName =
-        `${Date.now()}-${file.originalname}`;
+        `slide-${i + 1}-${Date.now()}.png`;
 
       const command = new PutObjectCommand({
         Bucket: process.env.AWS_BUCKET_NAME,
@@ -49,14 +94,82 @@ app.post("/upload", upload.array("images", 10), async (req, res) => {
       imageUrls.push(imageUrl);
     }
 
-    const analysis = await analyzeScreenshots(imageUrls,
-        "This is a programme management application.");
-        console.log("AI Analysis:", analysis);
+    const description =
+      req.body.description ||
+      "No description provided";
+
+    console.log("Step 1 - Upload complete");
+
+    // Narration Generation
+    const narrationData =
+      await generateNarration(
+        description,
+        imageUrls.length
+      );
+
+    console.log(
+      "Narration Generated:",
+      narrationData
+    );
+
+    // Audio Generation
+    const audioFiles =
+      await generateSlideAudios(
+        narrationData.slides
+      );
+
+    console.log(
+      "Audio Files Generated:",
+      audioFiles
+    );
+
+    localImages.reverse();
+    
+    // Video Generation
+    const slideVideos = [];
+
+    for (
+      let i = 0;
+      i < audioFiles.length;
+      i++
+    ) {
+
+      const videoPath =
+        `generated/video/slide${i + 1}.mp4`;
+
+      await createSlideVideo(
+        localImages[i],
+        audioFiles[i].audioPath,
+        videoPath
+      );
+
+      slideVideos.push(videoPath);
+
+      console.log(
+        `Generated slide${i + 1}.mp4`
+      );
+    }
+
+    // Merge Videos
+
+    const finalVideoPath = "generated/final/demo.mp4";
+    await mergeVideos(
+       slideVideos,
+       finalVideoPath
+    );
+
+console.log(
+  "Final Video Created:",
+  finalVideoPath
+);
 
     res.json({
-    success: true,
-    imageUrls,
-    analysis
+      success: true,
+      imageUrls,
+      narration: narrationData,
+      audioFiles,
+      slideVideos,
+      finalVideoPath
     });
 
   } catch (error) {
@@ -71,11 +184,6 @@ app.post("/upload", upload.array("images", 10), async (req, res) => {
   }
 
 });
-
-
-
-
-
 
 
 app.listen(5000, () => {

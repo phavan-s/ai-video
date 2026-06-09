@@ -22,25 +22,23 @@ const services = [
 ];
 
 function handleFileSelect(event) {
-  const files = Array.from(event.target.files);
 
-  files.forEach(file => {
-    const reader = new FileReader();
+  const files =
+    Array.from(event.target.files);
 
-    reader.onload = (e) => {
-      uploadedImages = [
-        ...uploadedImages,
-        {
-          id: Date.now() + Math.random(),
-          url: e.target.result,
-          name: file.name,
-          file
-        }
-      ];
-    };
+  const newImages = files.map(
+    (file, index) => ({
+      id: Date.now() + index,
+      url: URL.createObjectURL(file),
+      name: file.name,
+      file
+    })
+  );
 
-    reader.readAsDataURL(file);
-  });
+  uploadedImages = [
+    ...uploadedImages,
+    ...newImages
+  ];
 }
 
 function removeImage(id) {
@@ -69,6 +67,8 @@ async function sendImagesToBackend() {
     uploadedImages.forEach((image) => {
       formData.append('images', image.file);
     });
+
+    formData.append('description', description);
 
     const response = await fetch('http://localhost:5000/upload', {
       method: 'POST',
