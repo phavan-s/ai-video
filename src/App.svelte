@@ -2,11 +2,14 @@
 let selectedVoice = 'male';
 let selectedService = 'service1';
 let description = '';
+
 let uploadedImages = [];
 let fileInput;
+
 let isSending = false;
 let backendMessage = '';
-let aiAnalysis = "";
+
+let generatedVideoUrl = '';
 
 const voices = [
   { id: 'male', label: 'Male Voice' },
@@ -51,61 +54,95 @@ function triggerFileInput() {
 
 async function sendImagesToBackend() {
 
-  console.log("BUTTON CLICKED");
+  console.log("GENERATE VIDEO CLICKED");
 
   if (uploadedImages.length === 0) {
-    backendMessage = 'Please upload at least one image first.';
+    backendMessage =
+      "Please upload at least one image first.";
     return;
   }
 
   isSending = true;
-  backendMessage = '';
+  backendMessage = "";
+  generatedVideoUrl = "";
 
   try {
+
     const formData = new FormData();
 
     uploadedImages.forEach((image) => {
-      formData.append('images', image.file);
+      formData.append(
+        "images",
+        image.file
+      );
     });
 
-    formData.append('description', description);
+    formData.append(
+      "description",
+      description
+    );
 
-    const response = await fetch('http://localhost:5000/upload', {
-      method: 'POST',
-      body: formData
-    });
+    formData.append(
+      "voice",
+      selectedVoice
+    );
 
-    const data = await response.json();
+    formData.append(
+      "service",
+      selectedService
+    );
 
-    console.log('Backend Response:', data);
-    aiAnalysis = data.analysis || "No AI analysis provided.";
+    const response = await fetch(
+      "http://localhost:5000/upload",
+      {
+        method: "POST",
+        body: formData
+      }
+    );
 
-    if (!response.ok || !data.success) {
-      throw new Error(data.error || 'Upload failed');
+    const data =
+      await response.json();
+
+    console.log(
+      "Backend Response:",
+      data
+    );
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+      throw new Error(
+        data.error ||
+        "Video generation failed"
+      );
     }
 
-    console.log('S3 URLs:', data.imageUrls);
+    generatedVideoUrl =
+      `${data.videoUrl}?t=${Date.now()}`;
+
+    console.log("VIDEO URL:", generatedVideoUrl);
 
     backendMessage =
-      `Successfully uploaded ${data.imageUrls.length} image(s) to S3`;
-
-
-    
+      "Video generated successfully.";
 
   } catch (error) {
 
     console.error(error);
 
     backendMessage =
-      `Failed to upload: ${
+      `Failed: ${
         error instanceof Error
           ? error.message
-          : 'Unknown error'
+          : "Unknown error"
       }`;
 
   } finally {
+
     isSending = false;
-  }
+
+  } 
+
 }
 </script>
 
@@ -161,14 +198,7 @@ async function sendImagesToBackend() {
               <p>Click to upload images</p>
             </div>
 
-            <button
-              class="send-backend-btn"
-              on:click={sendImagesToBackend}
-              disabled={isSending}
-              type="button"
-            >
-              {isSending ? 'Sending...' : 'Send to Backend'}
-            </button>
+            
 
             {#if backendMessage}
               <p class="backend-message">{backendMessage}</p>
@@ -217,32 +247,57 @@ async function sendImagesToBackend() {
         </div>
 
         <!-- Generate Button -->
-        <button class="generate-btn">
-          Generate Video
-        </button>
+        <button
+              class="generate-btn"
+              on:click={sendImagesToBackend}
+              disabled={isSending}
+              type="button"
+            >
+              {isSending ? 'Generating...' : 'Generate Video'}
+            </button>
       </div>
     </div>
 
     <!-- Right Panel - Preview -->
-    <div class="right-panel">
-      <div class="preview-card">
-        <h2 class="card-title">Video Preview</h2>
-        <div class="video-player">
-          <div class="play-icon">
-            <svg viewBox="0 0 24 24" fill="white">
-              <polygon points="5 3 19 12 5 21 5 3" />
-            </svg>
-          </div>
-        </div>
-        {#if aiAnalysis}
-        <div class="analysis-box">
-          <h3>AI Analysis</h3>
-            <pre>{aiAnalysis}</pre>
-        </div>
-        {/if}
-        
-      </div>
+    <div class="preview-panel">
+
+  {#if isSending}
+
+    <div class="loading">
+      Generating Video...
     </div>
+
+  {:else if generatedVideoUrl}
+
+    <video
+      controls
+      width="100%"
+      preload="metadata"
+    >
+      <source
+        src={generatedVideoUrl}
+        type="video/mp4"
+      />
+
+      Your browser does not support video playback.
+    </video>
+
+  {:else}
+
+    <div class="placeholder">
+
+      <h3>Generated Demo</h3>
+
+      <p>
+        Upload screenshots and click
+        Generate Video
+      </p>
+
+    </div>
+
+  {/if}
+
+</div>
   </div>
 </div>
 

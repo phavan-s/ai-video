@@ -4,6 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import s3Client from "./services/s3Service.js";
 import fs from "fs";
+import path from "path";
 
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 
@@ -21,6 +22,13 @@ app.use(express.urlencoded({ extended: true }));
 const storage = multer.memoryStorage();
 
 const upload = multer({ storage });
+
+app.use(
+  "/generated",
+  express.static(
+    path.join(process.cwd(), "generated")
+  )
+);
 
 if (!fs.existsSync("generated/images")) {
   fs.mkdirSync("generated/images", {
@@ -162,6 +170,7 @@ console.log(
   "Final Video Created:",
   finalVideoPath
 );
+const videoUrl = `http://localhost:5000/generated/final/demo.mp4`;
 
     res.json({
       success: true,
@@ -169,7 +178,8 @@ console.log(
       narration: narrationData,
       audioFiles,
       slideVideos,
-      finalVideoPath
+      finalVideoPath,
+      videoUrl
     });
 
   } catch (error) {
