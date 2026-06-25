@@ -12,8 +12,9 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@aws-sdk/client-bedrock-runtime": "^3.1063.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.1075.0",
     "@aws-sdk/client-polly": "^3.1064.0",
+    "@aws-sdk/client-rekognition": "^3.1070.0",
     "@aws-sdk/client-s3": "^3.1063.0",
     "axios": "^1.17.0",
     "cors": "^2.8.6",

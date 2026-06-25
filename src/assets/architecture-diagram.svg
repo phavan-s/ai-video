@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333" />
+    </marker>
+    <style>
+      .box { fill:#ffffff; stroke:#2b2b2b; stroke-width:2; rx:8; }
+      .box-ai { fill:#f7fbf6; stroke:#2b7a4b; }
+      .text { font-family: Inter, Arial, sans-serif; font-size:14px; fill:#111; }
+      .title { font-size:16px; font-weight:700; }
+      .sub { font-size:12px; fill:#444; }
+      .cloud { fill:#eef6ff; stroke:#3b82f6; }
+      .note { font-size:12px; fill:#666; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="20" y="28" class="title text">AI Micro-Video Pipeline — Architecture & Data Flow</text>
+
+  <!-- User Browser -->
+  <rect x="20" y="60" width="200" height="80" class="box" />
+  <text x="30" y="90" class="text">User / Browser</text>
+  <text x="30" y="110" class="sub">`src/App.svelte` (Upload, Tracker, Player)</text>
+
+  <!-- Frontend -->
+  <rect x="260" y="45" width="220" height="110" class="box" />
+  <text x="270" y="72" class="text">Frontend (Svelte)</text>
+  <text x="270" y="92" class="sub">POST `FormData` → `POST /upload`</text>
+  <text x="270" y="110" class="sub">Receives SSE/WS progress & `videoUrl`</text>
+
+  <!-- API / Gateway -->
+  <rect x="520" y="45" width="160" height="110" class="box" />
+  <text x="535" y="80" class="text">API</text>
+  <text x="535" y="100" class="sub">`POST /upload`</text>
+
+  <!-- Backend -->
+  <rect x="720" y="30" width="240" height="140" class="box" />
+  <text x="740" y="60" class="text">Backend (Express)</text>
+  <text x="740" y="82" class="sub">`backend/server.js`</text>
+  <text x="740" y="102" class="sub">`multer` saves uploads → spawns tasks</text>
+
+  <!-- AI Engine box -->
+  <rect x="480" y="200" width="220" height="90" class="box-ai" />
+  <text x="500" y="230" class="text">AI Engine</text>
+  <text x="500" y="252" class="sub">groq-sdk → script generation & analysis</text>
+
+  <!-- Render Workers -->
+  <rect x="760" y="200" width="240" height="110" class="box" />
+  <text x="780" y="230" class="text">Render Worker(s)</text>
+  <text x="780" y="252" class="sub">Voice synthesis • Slide render • Encode MP4</text>
+
+  <!-- Storage / CDN -->
+  <rect x="1020" y="200" width="160" height="90" class="cloud" />
+  <text x="1040" y="235" class="text">Storage / CDN</text>
+  <text x="1040" y="255" class="sub">Object store (S3/MinIO) + CDN</text>
+
+  <!-- Realtime channel note -->
+  <text x="260" y="180" class="note">Realtime: SSE or WebSocket (events: progress, complete)</text>
+
+  <!-- Arrows: Browser -> Frontend -> API -> Backend -->
+  <line x1="220" y1="100" x2="260" y2="100" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="480" y1="100" x2="520" y2="100" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="680" y1="100" x2="720" y2="100" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Backend -> AI Engine -->
+  <line x1="780" y1="170" x2="780" y2="200" stroke="#2b7a4b" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="630" y="180" class="note">Analyze images → generate script</text>
+
+  <!-- Backend -> Render Worker (via queue) -->
+  <line x1="860" y1="170" x2="860" y2="200" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="780" y="170" class="note">Enqueue render task (Redis/RMQ)</text>
+
+  <!-- AI Engine -> Render Worker (script) -->
+  <line x1="700" y1="245" x2="760" y2="245" stroke="#2b7a4b" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Render Worker -> Storage/CDN -->
+  <line x1="1000" y1="245" x2="1020" y2="245" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Storage -> Frontend (videoUrl) -->
+  <path d="M1180 245 L1180 100 L760 100" fill="none" stroke="#444" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="900" y="88" class="note">Return `videoUrl`</text>
+
+  <!-- Realtime: Backend/Worker -> Frontend -->
+  <path d="M720 145 L520 145 L480 180" fill="none" stroke="#ff8c00" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="540" y="145" class="note">SSE/WS events: progress updates</text>
+
+  <!-- Footer notes -->
+  <text x="20" y="590" class="note">Notes: Use task queue and autoscaled workers; secure uploads (auth, scan, TTL); serve via CDN for low-latency playback.</text>
+
+</svg>

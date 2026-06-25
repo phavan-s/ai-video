@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Engineering Learning Handbook (Concise)</title>
+  <style>
+    :root {
+      --dark-bg: #0f1419;
+      --dark-card: #1a1f2e;
+      --dark-text: #e8eaed;
+      --light-bg: #f5f7fa;
+      --light-card: #ffffff;
+      --light-text: #1a1f2e;
+      --accent: #7c3aed;
+      --accent-bright: #a78bfa;
+      --accent-dark: #5b21b6;
+      --teal: #14b8a6;
+      --orange: #f97316;
+      --pink: #ec4899;
+      --success: #10b981;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      --shadow-dark: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --glass: rgba(255, 255, 255, 0.1);
+    }
+    
+    html { scroll-behavior: smooth; }
+    * { box-sizing: border-box; }
+    
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--light-text);
+      background: linear-gradient(135deg, var(--light-bg) 0%, #f0e7ff 100%);
+      line-height: 1.6;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    
+    body.dark-mode {
+      background: linear-gradient(135deg, var(--dark-bg) 0%, #1a0f3d 100%);
+      color: var(--dark-text);
+    }
+    
+    /* Header & Navigation */
+    header {
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    body.dark-mode header {
+      background: linear-gradient(135deg, #5b21b6 0%, #3730a3 100%);
+      box-shadow: var(--shadow-dark);
+    }
+    
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+    
+    .sub {
+      color: rgba(255, 255, 255, 0.85);
+      margin: 0;
+      font-size: 0.95rem;
+    }
+    
+    .nav-toggle {
+      display: none;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      position: absolute;
+      top: 20px;
+      right: 24px;
+    }
+    
+    .nav-toggle:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+    
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+      align-items: center;
+    }
+    
+    nav a {
+      text-decoration: none;
+      color: white;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 8px 16px;
+      border-radius: 24px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    
+    nav a:hover {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.6);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .theme-toggle {
+      margin-left: auto;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 8px 14px;
+      border-radius: 24px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    .theme-toggle:hover {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+    
+    /* Main Content */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+    
+    section {
+      margin-bottom: 40px;
+      scroll-margin-top: 100px;
+    }
+    
+    h2 {
+      margin: 0 0 16px;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--teal) 100%);
+      color: white;
+      border-radius: 12px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    body.dark-mode h2 {
+      box-shadow: 0 4px 16px rgba(124, 58, 237, 0.5);
+    }
+    
+    h2:hover {
+      transform: translateX(4px);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+    }
+    
+    h3 {
+      margin: 20px 0 12px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    h3:before {
+      content: "▶";
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+    
+    /* Diagrams */
+    .diagram {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(20, 184, 166, 0.05) 100%);
+      border: 2px solid var(--accent-bright);
+      border-radius: 12px;
+      padding: 16px;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      font-family: "Fira Code", Consolas, monospace;
+      font-size: 0.9rem;
+      line-height: 1.8;
+      margin: 16px 0;
+      transition: all 0.3s ease;
+    }
+    
+    body.dark-mode .diagram {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%);
+      border-color: rgba(167, 139, 250, 0.5);
+    }
+    
+    .diagram:hover {
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.2);
+      border-color: var(--teal);
+    }
+    
+    /* Topic Grid */
+    .topic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    
+    /* Details/Collapsible */
+    details {
+      background: var(--light-card);
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 0;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+    
+    body.dark-mode details {
+      background: var(--dark-card);
+      border-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    details:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      border-color: var(--accent);
+    }
+    
+    body.dark-mode details:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+    
+    summary {
+      cursor: pointer;
+      font-weight: 700;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(20, 184, 166, 0.08) 100%);
+      border-bottom: 2px solid transparent;
+      transition: all 0.3s ease;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    body.dark-mode summary {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(20, 184, 166, 0.15) 100%);
+    }
+    
+    summary:hover {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(20, 184, 166, 0.15) 100%);
+      border-bottom-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    summary:before {
+      content: "▼";
+      display: inline-block;
+      transition: transform 0.3s ease;
+      font-size: 0.85rem;
+      min-width: 16px;
+    }
+    
+    details[open] summary:before {
+      transform: rotate(-180deg);
+    }
+    
+    details[open] {
+      background: var(--light-card);
+    }
+    
+    details[open] summary {
+      border-bottom-color: var(--accent);
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(20, 184, 166, 0.12) 100%);
+    }
+    
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 0.9rem;
+    }
+    
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    
+    body.dark-mode th, body.dark-mode td {
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    th {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%);
+      font-weight: 600;
+      color: var(--accent);
+      width: 32%;
+    }
+    
+    body.dark-mode th {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.2) 0%, rgba(20, 184, 166, 0.2) 100%);
+    }
+    
+    tr:hover td {
+      background: rgba(124, 58, 237, 0.03);
+    }
+    
+    body.dark-mode tr:hover td {
+      background: rgba(124, 58, 237, 0.1);
+    }
+    
+    /* Lists */
+    .compact-list {
+      margin: 12px 0;
+      padding-left: 24px;
+    }
+    
+    .compact-list li {
+      margin: 6px 0;
+      line-height: 1.6;
+    }
+    
+    /* Comparison Section */
+    .compare {
+      background: var(--light-card);
+      border: 2px solid var(--accent-bright);
+      border-radius: 12px;
+      padding: 20px;
+      overflow-x: auto;
+      box-shadow: 0 4px 16px rgba(124, 58, 237, 0.1);
+    }
+    
+    body.dark-mode .compare {
+      background: var(--dark-card);
+      border-color: rgba(167, 139, 250, 0.5);
+      box-shadow: 0 4px 16px rgba(124, 58, 237, 0.2);
+    }
+    
+    /* Footer */
+    footer {
+      border-top: 2px solid var(--accent);
+      padding: 24px;
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(20, 184, 166, 0.05) 100%);
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--accent);
+      margin-top: 48px;
+    }
+    
+    body.dark-mode footer {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      header {
+        padding: 16px;
+      }
+      
+      .nav-toggle {
+        display: block;
+      }
+      
+      .header-container {
+        position: relative;
+      }
+      
+      nav {
+        max-height: 0;
+        overflow: hidden;
+        flex-direction: column;
+        margin-top: 0;
+        transition: max-height 0.3s ease;
+      }
+      
+      nav.active {
+        max-height: 500px;
+        margin-top: 16px;
+      }
+      
+      nav a {
+        width: 100%;
+        text-align: center;
+      }
+      
+      h1 { font-size: 1.4rem; }
+      h2 { font-size: 1.1rem; }
+      main { padding: 20px 16px; }
+      .topic-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    section {
+      animation: fadeInUp 0.6s ease-out;
+    }
+    
+    details {
+      animation: fadeInUp 0.4s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <button class="nav-toggle" id="navToggle">☰ Menu</button>
+      <h1>AI Engineering Learning Handbook</h1>
+      <p class="sub">For Full Stack Developers transitioning to AI Engineering. Focus: intuition + architecture + implementation + interviews + production.</p>
+      <nav id="mainNav">
+        <a href="#s1">1. LLM Fundamentals</a>
+        <a href="#s2">2. Embeddings and Search</a>
+        <a href="#s3">3. RAG</a>
+        <a href="#s4">4. Agents</a>
+        <a href="#s5">5. MCP</a>
+        <a href="#s6">6. Advanced Systems</a>
+        <a href="#s7">7. Production AI</a>
+        <a href="#comparisons">8. Comparisons</a>
+        <a href="#appendix">9. Appendix</a>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="s1">
+      <h2>1. LLM Fundamentals</h2>
+      <h3>How It Fits Into The Bigger Picture</h3>
+      <pre class="diagram">User Query
+-> Frontend
+-> Backend API
+-> Prompt Builder
+-> LLM (tokenization + reasoning + generation)
+-> Structured/Plain Response
+-> UI Render + Logging + Eval</pre>
+      <div id="llm-topics" class="topic-grid"></div>
+    </section>
+
+    <section id="s2">
+      <h2>2. Embeddings and Search</h2>
+      <h3>How It Fits Into The Bigger Picture</h3>
+      <pre class="diagram">Data Sources
+-> Cleaning + Chunking
+-> Embedding Model
+-> Vector Index / Hybrid Index
+User Query
+-> Query Embedding
+-> Similarity + Keyword Search
+-> Top-k Context</pre>
+      <div id="emb-topics" class="topic-grid"></div>
+    </section>
+
+    <section id="s3">
+      <h2>3. Retrieval-Augmented Generation (RAG)</h2>
+      <h3>How It Fits Into The Bigger Picture</h3>
+      <pre class="diagram">Question
+-> Retrieve Chunks
+-> Rerank
+-> Filter by Metadata
+-> Build Grounded Prompt
+-> LLM Answer with Citations
+-> Evaluate (faithfulness, relevance, latency, cost)</pre>
+      <div id="rag-topics" class="topic-grid"></div>
+    </section>
+
+    <section id="s4">
+      <h2>4. Agents</h2>
+      <h3>How It Fits Into The Bigger Picture</h3>
+      <pre class="diagram">Goal
+-> Planner Agent
+-> Tool Selection
+-> Tool Execution
+-> Observation
+-> Next Action Decision
+-> Human Approval (if needed)
+-> Final Output</pre>
+      <div id="agent-topics" class="topic-grid"></div>
+    </section>
+
+    <section id="s5">
+      <h2>5. MCP (Model Context Protocol)</h2>
+      <h3>How It Fits Into The Bigger Picture</h3>
+      <pre class="diagram">LLM Client
+-> MCP Client Runtime
+-> MCP Server(s): tools, resources, prompts
+-> Enterprise Systems (DB, CRM, Docs, Internal APIs)
+-> Standardized, secure tool access</pre>
+      <div id="mcp-topics" class="topic-grid"></div>
+    </section>
+
+    <section id="s6">
+      <h2>6. Advanced AI Systems</h2>
+      <h3>How It Fits Into The Bigger Picture</h3>
+      <pre class="diagram">User Intent
+-> Orchestrator (LangGraph / custom DAG)
+-> Specialist Agents
+-> Retrieval (Vector + Graph)
+-> Knowledge Graph Reasoning
+-> Aggregation + Verification
+-> Answer + trace</pre>
+      <div id="adv-topics" class="topic-grid"></div>
+    </section>
+
+    <section id="s7">
+      <h2>7. Production AI Engineering</h2>
+      <h3>How It Fits Into The Bigger Picture</h3>
+      <pre class="diagram">Client Apps
+-> FastAPI Gateway
+-> AI Services (RAG/Agent)
+-> Cache + Queue + Worker
+-> Model Providers + Vector DB
+-> Observability + Eval + Cost Guardrails
+-> Docker/K8s/Cloud Deployment</pre>
+      <div id="prod-topics" class="topic-grid"></div>
+    </section>
+
+    <section id="comparisons">
+      <h2>8. Commonly Confused Concepts (Quick Comparison)</h2>
+      <div class="compare">
+        <table>
+          <thead>
+            <tr><th>Comparison</th><th>Key Difference</th><th>When To Use</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>LLMs vs Traditional Software</td><td>Probabilistic generation vs deterministic rules</td><td>Use LLM for language ambiguity; traditional code for strict logic.</td></tr>
+            <tr><td>Embeddings vs Vector Databases</td><td>Embedding is representation; vector DB is storage/index/query engine</td><td>Need semantic retrieval at scale.</td></tr>
+            <tr><td>Semantic Search vs Keyword Search</td><td>Meaning matching vs literal term matching</td><td>Use hybrid for best recall + precision.</td></tr>
+            <tr><td>RAG vs Fine-Tuning</td><td>External knowledge injection vs model weight update</td><td>RAG for fresh/private knowledge; tune for behavior/style.</td></tr>
+            <tr><td>Function Calling vs Tool Calling</td><td>Model output format convention vs full runtime tool execution loop</td><td>Function calling inside single turn; tool calling in agent loop.</td></tr>
+            <tr><td>LangChain vs LangGraph</td><td>Chain abstractions vs stateful graph orchestration</td><td>LangChain for quick flows, LangGraph for complex stateful agents.</td></tr>
+            <tr><td>Elasticsearch vs OpenSearch</td><td>Managed/licensing ecosystem differences</td><td>Choose by org policy, managed service fit, feature parity needs.</td></tr>
+            <tr><td>Agents vs RAG</td><td>Action-oriented planning systems vs retrieval-grounded answering</td><td>RAG for QA; agents for multi-step tasks with tools.</td></tr>
+            <tr><td>MCP vs Traditional APIs</td><td>AI-tool protocol standard vs custom service contracts</td><td>MCP for reusable tool exposure across many AI clients.</td></tr>
+            <tr><td>GraphRAG vs Traditional RAG</td><td>Graph-structured reasoning + retrieval vs chunk-level retrieval only</td><td>GraphRAG for connected entities and multi-hop questions.</td></tr>
+            <tr><td>Multi-Agent vs Single Agent</td><td>Specialized collaboration vs simpler single policy</td><td>Use multi-agent only when specialization beats complexity cost.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="appendix">
+      <h2>9. Appendix</h2>
+
+      <h3>9.1 Complete AI Engineering Glossary (Condensed)</h3>
+      <p>Token, context window, prompt, completion, temperature, top-p, embedding, cosine similarity, ANN index, vector DB, chunking, reranker, grounding, hallucination, retrieval recall, precision, faithfulness, tool, function call, agent loop, planner, memory, MCP server, MCP client, LangChain, LangGraph, GraphRAG, latency, throughput, p95, observability, eval set, guardrails, fallback, SLO, autoscaling, canary deploy, circuit breaker.</p>
+
+      <h3>9.2 AI Engineering Interview Cheat Sheet</h3>
+      <ul class="compact-list">
+        <li>Explain end-to-end RAG flow and failure points.</li>
+        <li>Discuss chunking, retrieval metrics, reranking trade-offs.</li>
+        <li>Compare RAG vs fine-tune with cost/time/security lens.</li>
+        <li>Design tool-calling agent with retries and human approval.</li>
+        <li>Show production concerns: latency, cost, eval, observability.</li>
+      </ul>
+
+      <h3>9.3 End-to-End AI System Architecture</h3>
+      <pre class="diagram">Web/Mobile UI
+-> API Gateway (FastAPI)
+-> Auth + Rate Limit
+-> Orchestrator (RAG or Agent)
+-> Retrieval Layer (Vector DB + keyword index + reranker)
+-> LLM Provider(s)
+-> Tool/MCP Layer
+-> Response Validator + Policy Filter
+-> Observability + Evaluation + Cost Tracking
+-> Persistent Logs + Feedback Loop</pre>
+
+      <h3>9.4 AI Engineering Learning Path</h3>
+      <ul class="compact-list">
+        <li>Stage 1 (Weeks 1-2): LLM basics, prompts, structured outputs.</li>
+        <li>Stage 2 (Weeks 3-4): Embeddings, vector search, hybrid retrieval.</li>
+        <li>Stage 3 (Weeks 5-6): Build RAG with evaluation and monitoring.</li>
+        <li>Stage 4 (Weeks 7-8): Agents, tool calling, MCP integration.</li>
+        <li>Stage 5 (Weeks 9-12): Production deployment, scaling, cost control.</li>
+      </ul>
+
+      <h3>9.5 Recommended Projects For Each Stage</h3>
+      <ul class="compact-list">
+        <li>Stage 1: Prompt playground + structured JSON extractor.</li>
+        <li>Stage 2: Semantic FAQ search with hybrid retrieval.</li>
+        <li>Stage 3: Domain RAG bot with citations and eval dashboard.</li>
+        <li>Stage 4: Support agent with tools (CRM, ticketing, docs).</li>
+        <li>Stage 5: Multi-tenant AI platform with usage billing + SLOs.</li>
+      </ul>
+
+      <h3>9.6 Production AI System Design Principles</h3>
+      <ul class="compact-list">
+        <li>Prefer simple architectures before adding agent complexity.</li>
+        <li>Ground outputs in trusted context whenever possible.</li>
+        <li>Treat evaluation as a continuous CI/CD gate.</li>
+        <li>Design for graceful degradation and model/provider fallback.</li>
+        <li>Instrument every layer: quality, latency, cost, safety.</li>
+      </ul>
+
+      <h3>9.7 Common AI Engineering Pitfalls</h3>
+      <ul class="compact-list">
+        <li>Skipping eval datasets and relying on ad-hoc demos.</li>
+        <li>Over-chunking or under-chunking without measurement.</li>
+        <li>Building multi-agent systems before proving single-agent value.</li>
+        <li>No guardrails for prompt injection and unsafe tool actions.</li>
+        <li>Ignoring token costs and context bloat in production.</li>
+      </ul>
+
+      <h3>9.8 Industry Best Practices</h3>
+      <ul class="compact-list">
+        <li>Version prompts, retrieval configs, and evaluation sets.</li>
+        <li>Use hybrid search + reranking for robust retrieval quality.</li>
+        <li>Keep human escalation path for high-risk decisions.</li>
+        <li>Enforce strict output schemas for downstream automation.</li>
+        <li>Run post-deploy drift checks on quality and cost.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    Concise edition: designed to be scanned fast, then expanded by building projects section-by-section.
+  </footer>
+
+  <script>
+    const fieldOrder = [
+      "What is it?",
+      "Why does it exist?",
+      "Real World Analogy",
+      "Intuition First",
+      "Technical Explanation",
+      "Architecture Placement",
+      "Workflow",
+      "Practical Example",
+      "Related Concepts",
+      "Key Terms",
+      "Common Beginner Mistakes",
+      "Interview Perspective",
+      "Production Perspective",
+      "Summary"
+    ];
+
+    function buildEntry(t) {
+      return {
+        "What is it?": t.what,
+        "Why does it exist?": t.why,
+        "Real World Analogy": t.analogy,
+        "Intuition First": t.intuition,
+        "Technical Explanation": t.technical,
+        "Architecture Placement": t.placement,
+        "Workflow": t.workflow,
+        "Practical Example": t.example,
+        "Related Concepts": t.related,
+        "Key Terms": t.terms,
+        "Common Beginner Mistakes": t.mistakes,
+        "Interview Perspective": t.interview,
+        "Production Perspective": t.production,
+        "Summary": t.summary
+      };
+    }
+
+    function topic(name, next, domain) {
+      return buildEntry({
+        what: name + " in " + domain + ": core concept used to make model behavior reliable.",
+        why: "Solves a specific reliability or capability gap in AI systems.",
+        analogy: "Like adding the right team role in a software delivery pipeline.",
+        intuition: "Without " + name + ", answers are weaker, slower, or less trustworthy.",
+        technical: "Implemented with model APIs, retrieval/indexing logic, and orchestration code.",
+        placement: "Sits in the app layer between user intent, context, and model output.",
+        workflow: "Input -> processing step for " + name + " -> validated output.",
+        example: "Customer support assistant uses " + name + " to improve accuracy.",
+        related: "Connected to prompting, retrieval, eval, and system observability.",
+        terms: "latency, quality, grounding, precision, recall, robustness",
+        mistakes: "Overengineering early, no metrics, no fallback path.",
+        interview: "Expect architecture, trade-offs, and failure-mode discussion.",
+        production: "Track p95 latency, cost/request, quality score, and incident rate.",
+        summary: name + " is foundational; master it before moving to " + next + "."
+      });
+    }
+
+    const sections = {
+      "llm-topics": [
+        ["Tokens", "Context Windows"],
+        ["Context Windows", "Prompt Engineering"],
+        ["Prompt Engineering", "Function Calling"],
+        ["Function Calling", "Structured Outputs"],
+        ["Structured Outputs", "LLM Limitations"],
+        ["LLM Limitations", "Embeddings"]
+      ],
+      "emb-topics": [
+        ["Embeddings", "Similarity Search"],
+        ["Similarity Search", "Cosine Similarity"],
+        ["Cosine Similarity", "Vector Databases"],
+        ["Vector Databases", "Hybrid Search"],
+        ["Hybrid Search", "Chunking"]
+      ],
+      "rag-topics": [
+        ["Chunking", "Retrieval"],
+        ["Retrieval", "Reranking"],
+        ["Reranking", "Metadata Filtering"],
+        ["Metadata Filtering", "Evaluation"],
+        ["Evaluation", "Production RAG"],
+        ["Production RAG", "Tool Calling"]
+      ],
+      "agent-topics": [
+        ["Tool Calling", "Agent Workflows"],
+        ["Agent Workflows", "Multi-Step Reasoning"],
+        ["Multi-Step Reasoning", "Human-in-the-Loop"],
+        ["Human-in-the-Loop", "MCP Servers"]
+      ],
+      "mcp-topics": [
+        ["MCP Servers", "MCP Clients"],
+        ["MCP Clients", "Tool Integration"],
+        ["Tool Integration", "Enterprise Integrations"],
+        ["Enterprise Integrations", "LangGraph"]
+      ],
+      "adv-topics": [
+        ["LangGraph", "Multi-Agent Systems"],
+        ["Multi-Agent Systems", "GraphRAG"],
+        ["GraphRAG", "Knowledge Graphs"],
+        ["Knowledge Graphs", "AI Orchestration"],
+        ["AI Orchestration", "FastAPI"]
+      ],
+      "prod-topics": [
+        ["FastAPI", "Docker"],
+        ["Docker", "Kubernetes"],
+        ["Kubernetes", "Monitoring"],
+        ["Monitoring", "Evaluation"],
+        ["Evaluation", "Cost Optimization"],
+        ["Cost Optimization", "Cloud Deployment"],
+        ["Cloud Deployment", "Continuous Improvement"]
+      ]
+    };
+
+    function renderTopics(containerId, domain) {
+      const root = document.getElementById(containerId);
+      sections[containerId].forEach(([name, next]) => {
+        const data = topic(name, next, domain);
+        const d = document.createElement("details");
+        const s = document.createElement("summary");
+        s.textContent = name;
+        d.appendChild(s);
+
+        const table = document.createElement("table");
+        const tbody = document.createElement("tbody");
+        fieldOrder.forEach((k) => {
+          const tr = document.createElement("tr");
+          const th = document.createElement("th");
+          const td = document.createElement("td");
+          th.textContent = k;
+          td.textContent = data[k];
+          tr.appendChild(th);
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        d.appendChild(table);
+        root.appendChild(d);
+      });
+    }
+
+    renderTopics("llm-topics", "LLM Fundamentals");
+    renderTopics("emb-topics", "Embeddings and Search");
+    renderTopics("rag-topics", "RAG");
+    renderTopics("agent-topics", "Agents");
+    renderTopics("mcp-topics", "MCP");
+    renderTopics("adv-topics", "Advanced AI Systems");
+    renderTopics("prod-topics", "Production AI Engineering");
+
+    // Theme Toggle
+    const themeToggle = document.getElementById("themeToggle");
+    const navToggle = document.getElementById("navToggle");
+    const mainNav = document.getElementById("mainNav");
+
+    // Check for saved theme preference or default to light mode
+    const currentTheme = localStorage.getItem("theme") || "light";
+    if (currentTheme === "dark") {
+      document.body.classList.add("dark-mode");
+      themeToggle.textContent = "☀️";
+    }
+
+    // Theme toggle handler
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+      const isDarkMode = document.body.classList.contains("dark-mode");
+      localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+      themeToggle.textContent = isDarkMode ? "☀️" : "🌙";
+    });
+
+    // Mobile nav toggle
+    navToggle.addEventListener("click", () => {
+      mainNav.classList.toggle("active");
+      navToggle.textContent = mainNav.classList.contains("active") ? "✕ Close" : "☰ Menu";
+    });
+
+    // Close nav when a link is clicked
+    mainNav.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => {
+        mainNav.classList.remove("active");
+        navToggle.textContent = "☰ Menu";
+      });
+    });
+  </script>
+</body>
+</html>

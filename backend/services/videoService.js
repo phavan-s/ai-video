@@ -14,17 +14,24 @@ export function createSlideVideo(
 
   return new Promise((resolve, reject) => {
 
-    const outputDir = path.dirname(outputPath);
+    const outputDir =
+      path.dirname(outputPath);
 
     if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, {
-        recursive: true
-      });
+
+      fs.mkdirSync(
+        outputDir,
+        { recursive: true }
+      );
+
     }
 
     ffmpeg()
+
       .input(imagePath)
-      .inputOptions(["-loop 1"])
+      .inputOptions([
+        "-loop 1"
+      ])
 
       .input(audioPath)
 
@@ -44,19 +51,35 @@ export function createSlideVideo(
       ])
 
       .on("start", (cmd) => {
-        console.log("Create Video Command:");
+
+        console.log(
+          "Create Video Command:"
+        );
+
         console.log(cmd);
+
       })
 
       .on("end", () => {
-        console.log(`Created ${outputPath}`);
+
+        console.log(
+          `Created ${outputPath}`
+        );
+
         resolve(outputPath);
+
       })
 
       .on("error", (err) => {
-        console.error("Video Creation Error:");
+
+        console.error(
+          "Video Creation Error:"
+        );
+
         console.error(err);
+
         reject(err);
+
       })
 
       .save(outputPath);
@@ -72,17 +95,22 @@ export function mergeVideos(
 
   return new Promise((resolve, reject) => {
 
-    const outputDir = path.dirname(outputPath);
+    const outputDir =
+      path.dirname(outputPath);
 
     if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, {
-        recursive: true
-      });
+
+      fs.mkdirSync(
+        outputDir,
+        { recursive: true }
+      );
+
     }
 
-    const fileListPath = path.resolve(
-      "generated/video/videos.txt"
-    );
+    const fileListPath =
+      path.resolve(
+        "generated/video/videos.txt"
+      );
 
     const fileContent =
       videoPaths
@@ -96,44 +124,102 @@ export function mergeVideos(
       fileContent
     );
 
-    console.log("================================");
-    console.log("VIDEOS.TXT CONTENT");
-    console.log("================================");
-    console.log(fileContent);
-    console.log("================================");
-
     ffmpeg()
+
       .input(fileListPath)
+
       .inputOptions([
         "-f concat",
         "-safe 0"
       ])
+
       .outputOptions([
         "-c copy"
       ])
 
       .on("start", (cmd) => {
-        console.log("Merge Command:");
-        console.log(cmd);
-      })
 
-      .on("stderr", (line) => {
-        console.log("FFMPEG:", line);
+        console.log(
+          "Merge Command:"
+        );
+
+        console.log(cmd);
+
       })
 
       .on("end", () => {
-        console.log("Final Demo Created");
+
+        console.log(
+          "Final Demo Created"
+        );
+
         resolve(outputPath);
+
       })
 
       .on("error", (err) => {
-        console.error("Merge Error:");
+
+        console.error(
+          "Merge Error:"
+        );
+
         console.error(err);
+
         reject(err);
+
       })
 
-      .save(path.resolve(outputPath));
+      .save(
+        path.resolve(outputPath)
+      );
 
   });
+
+}
+
+export function getImageDimensions(
+  imagePath
+) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      ffmpeg.ffprobe(
+        imagePath,
+
+        (err, metadata) => {
+
+          if (err) {
+            return reject(err);
+          }
+
+          const stream =
+            (metadata.streams || [])
+              .find(
+                s =>
+                  s.width &&
+                  s.height
+              );
+
+          if (!stream) {
+
+            return reject(
+              new Error(
+                "No image stream found"
+              )
+            );
+
+          }
+
+          resolve({
+            width: stream.width,
+            height: stream.height
+          });
+
+        }
+      );
+
+    }
+  );
 
 }

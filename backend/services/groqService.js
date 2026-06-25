@@ -19,194 +19,232 @@ function extractJson(content) {
       .trim();
 
     return JSON.parse(cleaned);
+
   }
+
 }
 
 export async function generateNarration(
   description,
-  imageCount
+  slideOCRData = []
 ) {
 
+  const imageCount =
+    slideOCRData.length;
+
+  const ocrContext =
+    slideOCRData
+      .map(
+        slide =>
+
+`SLIDE ${slide.slideNumber}
+
+OCR TEXT:
+${slide.ocrText}
+
+========================================`
+      )
+      .join("\n");
+
+  console.log(
+    "================================"
+  );
+
+  console.log(
+    "OCR CONTEXT SENT TO GROQ"
+  );
+
+  console.log(
+    ocrContext
+  );
+
+  console.log(
+    "================================"
+  );
+
   const prompt = `
-You are an expert enterprise software B2B motion graphics director. Your sole task is to break down a product user journey into a frame-accurate narration timeline.
 
-Analyze the provided technical description and generate exactly ${imageCount} sequence slides. 
+You are an enterprise software walkthrough narrator.
 
-### OUTPUT FORMAT SPECIFICATION ###
-You must return ONLY a raw, valid JSON object matching the schema below. Do not include markdown formatting blocks (such as json). 
+Your job is to generate narration that precisely follows the uploaded screenshots.
+
+==================================================
+SERVICE DESCRIPTION
+==================================================
+
+${description}
+
+==================================================
+SCREEN CONTENT DETECTED BY OCR
+==================================================
+
+${ocrContext}
+
+==================================================
+VERY IMPORTANT
+==================================================
+
+Treat each OCR block as one screenshot.
+
+SLIDE 1 OCR
+must generate
+SLIDE 1 narration.
+
+SLIDE 2 OCR
+must generate
+SLIDE 2 narration.
+
+SLIDE 3 OCR
+must generate
+SLIDE 3 narration.
+
+Never mix OCR content between slides.
+
+OCR is the PRIMARY source of truth.
+
+The service description is SECONDARY context.
+
+If OCR contains:
+
+Programs
+
+Then discuss Programs.
+
+If OCR contains:
+
+Requirements
+
+Then discuss Requirements.
+
+If OCR contains:
+
+Trainings
+
+Then discuss Trainings.
+
+Do not invent screens, buttons, workflows, or features that are not visible in OCR.
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return ONLY valid JSON.
 
 {
   "slides": [
     {
       "slideNumber": 1,
-      "narration": "First, developers initialize the workflow engine by connecting their production data repositories directly to the secure environment pipeline."
+      "narration": "",
+      "focusElement": ""
     }
   ]
 }
 
-### STRICT RULES FOR NARRATION GENERATION ###
-### STRICT RULES FOR NARRATION GENERATION
+==================================================
+NARRATION RULES
+==================================================
 
-1. EXACT SLIDE COUNT
+1. Generate exactly ${imageCount} slides.
 
-   * Generate exactly ${imageCount} slide objects.
-   * Never generate more or fewer slides.
+2. Each slide MUST contain:
+   - slideNumber
+   - narration
+   - focusElement
 
-2. JOURNEY-FIRST STORYTELLING
+3. Each narration must contain 1-2 short sentences.
 
-   * Treat the uploaded screenshots as a sequential user journey.
-   * Distribute the service description across the available slides in logical chronological order.
-   * Progress naturally from discovery → configuration → execution → tracking → completion.
+4. Use second person.
 
-3. SCREEN AWARENESS
+Use:
+- you
+- your
 
-   * Infer the purpose of each screen from its position in the journey.
-   * If the first screen appears to be a landing page, dashboard, home page, service catalog, navigation hub, or entry point, introduce the workflow in one concise sentence.
-   * If the final screen appears to show results, status, analytics, progress, completion, certification, summary, or reporting, conclude the workflow in one concise sentence.
-   * Intermediate screens should focus on actions, configuration steps, requirements, data entry, approvals, progress tracking, or execution activities.
+Never use:
+- users
+- customers
+- organizations
+- they
 
-4. SHORT INTRODUCTION
+5. Never say:
 
-   * The first slide may contain a very short introduction if appropriate.
-   * Example style:
+- in this screenshot
+- on this screen
+- this page shows
+- as you can see
+- this slide displays
 
-     * "You begin in the Programs workspace, where available program tracks are organized by eligibility and enrollment status."
-     * "You access the Opportunities dashboard to review and manage active pipeline activity."
+6. First slide must start with a short greeting.
 
-5. SHORT CONCLUSION
+Example:
 
-   * The final slide may contain a very short outcome-focused conclusion if appropriate.
-   * Example style:
+"Hello, let's explore the Programs experience."
 
-     * "You can monitor completion status and continue progressing toward certification requirements."
-     * "You gain visibility into performance metrics and next actions."
+7. Final slide must end with a short conclusion.
 
-6. DIRECT USER PERSPECTIVE
+Example:
 
-   * Always address the viewer as "you".
-   * Never use:
+"Thank you for your time."
 
-     * the user
-     * customers
-     * users
-     * they
-     * organizations
-   * Use:
+8. focusElement rules:
 
-     * you
-     * your
+- 1 to 4 words
+- Must exist in OCR text
+- Must represent the primary area discussed
 
-7. NO SCREEN REFERENCES
+Examples:
 
-   * Never say:
+Programs
+Requirements
+Trainings
+Dashboard
+Orders
+Certification
+Opportunities
 
-     * "In this screenshot"
-     * "On this screen"
-     * "This page shows"
-     * "As you can see"
-     * "This slide displays"
+9. Return ONLY JSON.
 
-8. CONCISE PACING
+No markdown.
 
-   * Each slide must contain only 1–2 short sentences.
-   * Target 10–25 words per sentence.
-   * Avoid repetition across slides.
+No explanations.
 
-9. ENTERPRISE SOFTWARE TONE
+`;
 
-   * Use a professional enterprise SaaS product demonstration style.
-   * Focus on workflows, actions, requirements, status, configuration, tracking, reporting, and outcomes.
-   * Avoid marketing language and promotional wording.
+  const response =
+    await groq.chat.completions.create({
 
-10. ACTION-ORIENTED LANGUAGE
+      model:
+        "llama-3.3-70b-versatile",
 
-* Prefer:
+      messages: [
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
 
-  * Review
-  * Configure
-  * Enroll
-  * Track
-  * Monitor
-  * Complete
-  * Validate
-  * Submit
-  * Analyze
-  * Manage
-  * Progress
-* Avoid vague descriptions.
+      temperature: 0.1
 
-11. NO GENERIC FILLER
-
-* Do not include:
-
-  * Welcome to
-  * Thank you for watching
-  * Powerful platform
-  * Seamless experience
-  * Innovative solution
-  * Industry-leading
-  * Best-in-class
-
-12. NARRATION SHOULD SOUND LIKE A HUMAN DEMO VOICEOVER
-
-* Every slide should feel like part of a continuous guided walkthrough.
-* The narration should flow naturally from one slide to the next without sounding like disconnected summaries.
-
-13. PROFESSIONAL INTRODUCTION
-
-* The first slide MUST contain a short greeting.
-* Limit the greeting to one concise sentence.
-* The greeting should naturally introduce the workflow being demonstrated.
-* Examples:
-
-  * "Hello, let's explore the Programs experience."
-  * "Hi, let's walk through the Opportunities workflow."
-  * "Hello, let's review how you can manage program participation and progression."
-  * "Hi, let's take a look at the Orders experience."
-
-14. PROFESSIONAL CLOSING
-
-* The final slide MUST contain a short closing statement.
-* Limit the closing to one concise sentence.
-* The closing should summarize the outcome or next step.
-* Examples:
-
-  * "You can continue monitoring progress and completing remaining requirements."
-  * "Your program status and achievements remain available for ongoing tracking."
-  * "You now have visibility into performance, progress, and next actions."
-  * "Thank you for your time."
-
-15. GREETING AND CLOSING CONSTRAINTS
-
-* The greeting and closing together should consume no more than 2 slides worth of content.
-* Do not generate lengthy introductions.
-* Do not generate lengthy conclusions.
-* Keep the primary focus on the workflow itself.
-* The middle slides should contain the majority of the narration.
-
-### PRODUCT SERVICE DESCRIPTION SOURCE OF TRUTH ###
-${description}`;
-
-  const response = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-
-    messages: [
-      {
-        role: "user",
-        content: prompt
-      }
-    ],
-
-    temperature: 0.2
-  });
+    });
 
   const content =
     response.choices[0].message.content;
 
   console.log(
-    "Narration Response:",
+    "================================"
+  );
+
+  console.log(
+    "NARRATION RESPONSE"
+  );
+
+  console.log(
     content
   );
 
+  console.log(
+    "================================"
+  );
+
   return extractJson(content);
+
 }
